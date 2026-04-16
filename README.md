@@ -1,1 +1,0 @@
-# hng-14-internship
