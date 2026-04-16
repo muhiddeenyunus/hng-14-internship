@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Todo Item Card</title>
+  <title>Todo Card — Stage 1a</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,9 +12,9 @@
       background: #f4f4f0;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 2rem 1rem;
     }
 
     .sr-only {
@@ -25,252 +25,220 @@
 
     article[data-testid="test-todo-card"] {
       background: #ffffff;
-      border: 1px solid #e2e0d8;
+      border: 1.5px solid #d3d1c7;
       border-radius: 14px;
-      padding: 1.5rem 1.5rem 1.25rem;
       max-width: 480px;
       width: 100%;
+      overflow: hidden;
+      transition: border-color 0.2s;
     }
 
-    /* ── Header ── */
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
+    article.priority-high   { border-left: 4px solid #E24B4A; }
+    article.priority-medium { border-left: 4px solid #EF9F27; }
+    article.priority-low    { border-left: 4px solid #639922; }
+    article.is-overdue      { border-color: #F09595; }
 
-    .checkbox-wrap {
-      display: flex;
-      align-items: center;
-      padding-top: 3px;
-      flex-shrink: 0;
+    .card-inner { padding: 1.5rem 1.5rem 1.25rem; }
+
+    .card-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+
+    [data-testid="test-todo-priority-indicator"] {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px; transition: background 0.2s;
     }
+    .dot-high   { background: #E24B4A; }
+    .dot-medium { background: #EF9F27; }
+    .dot-low    { background: #639922; }
 
     input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #7F77DD;
-      cursor: pointer;
+      width: 17px; height: 17px; accent-color: #7F77DD;
+      cursor: pointer; flex-shrink: 0; margin-top: 3px;
     }
-
-    input[type="checkbox"]:focus-visible {
-      outline: 2px solid #7F77DD;
-      outline-offset: 3px;
-    }
+    input[type="checkbox"]:focus-visible { outline: 2px solid #7F77DD; outline-offset: 2px; }
 
     .title-area { flex: 1; min-width: 0; }
 
     h2[data-testid="test-todo-title"] {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1a1a18;
-      line-height: 1.4;
-      transition: all 0.2s ease;
+      font-size: 17px; font-weight: 600; color: #1a1a18;
+      line-height: 1.4; word-break: break-word; transition: all 0.2s;
     }
+    h2.done { text-decoration: line-through; color: #9a9890; }
 
-    h2.done {
-      text-decoration: line-through;
-      color: #9a9890;
-    }
+    .badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 7px; }
 
-    /* ── Badges ── */
-    .badges {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 7px;
-    }
+    .badge-priority { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 99px; }
+    .badge-high     { background: #FCEBEB; color: #A32D2D; }
+    .badge-medium   { background: #FAEEDA; color: #633806; }
+    .badge-low      { background: #EAF3DE; color: #27500A; }
 
-    span[data-testid="test-todo-priority"] {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 3px 11px;
-      border-radius: 99px;
-      background: #AFA9EC;
-      color: #3C3489;
-    }
-
-    span[data-testid="test-todo-status"] {
-      font-size: 12px;
-      font-weight: 500;
-      padding: 3px 11px;
-      border-radius: 99px;
-      background: #f1efe8;
-      color: #5f5e5a;
+    [data-testid="test-todo-status"] {
+      font-size: 11px; font-weight: 500; padding: 2px 10px;
+      border-radius: 99px; background: #f1efe8; color: #5f5e5a;
       border: 1px solid #d3d1c7;
-      transition: all 0.2s ease;
     }
 
-    span[data-testid="test-todo-status"].status-done {
-      background: #C0DD97;
-      color: #27500A;
-      border-color: #97C459;
+    [data-testid="test-todo-overdue-indicator"] {
+      font-size: 11px; font-weight: 600; padding: 2px 10px;
+      border-radius: 99px; background: #FCEBEB; color: #A32D2D; display: none;
     }
+    [data-testid="test-todo-overdue-indicator"].show { display: inline-block; }
 
-    /* ── Description ── */
+    .desc-wrapper { margin-bottom: 16px; }
+
     p[data-testid="test-todo-description"] {
-      font-size: 14px;
-      color: #5f5e5a;
-      line-height: 1.65;
-      margin-bottom: 16px;
+      font-size: 14px; color: #5f5e5a; line-height: 1.65; word-break: break-word;
+    }
+    p[data-testid="test-todo-description"].collapsed {
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    /* ── Meta ── */
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
+    [data-testid="test-todo-expand-toggle"] {
+      font-size: 12px; color: #534AB7; background: none;
+      border: none; padding: 5px 0 0; cursor: pointer; font-weight: 500;
+    }
+    [data-testid="test-todo-expand-toggle"]:focus-visible { outline: 2px solid #7F77DD; outline-offset: 2px; }
+
+    .meta { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .meta-item { display: flex; align-items: center; gap: 5px; }
+    .meta-label { font-size: 11px; color: #9a9890; text-transform: uppercase; letter-spacing: .04em; }
+    time[data-testid="test-todo-due-date"] { font-size: 13px; font-weight: 500; color: #444441; }
+
+    [data-testid="test-todo-time-remaining"] { font-size: 13px; font-weight: 500; }
+    .tr-ok      { color: #3B6D11; }
+    .tr-soon    { color: #854F0B; }
+    .tr-overdue { color: #A32D2D; }
+    .tr-done    { color: #888780; }
+
+    .status-row { margin-bottom: 16px; }
+    .status-row > label {
+      font-size: 11px; color: #9a9890; text-transform: uppercase;
+      letter-spacing: .04em; display: block; margin-bottom: 6px;
     }
 
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    [data-testid="test-todo-status-control"] {
+      display: inline-flex; border: 1px solid #d3d1c7; border-radius: 8px; overflow: hidden;
+    }
+    [data-testid="test-todo-status-control"] button {
+      font-size: 12px; font-weight: 500; padding: 6px 14px;
+      background: transparent; border: none; cursor: pointer;
+      color: #5f5e5a; transition: background 0.15s, color 0.15s; font-family: inherit;
+    }
+    [data-testid="test-todo-status-control"] button + button { border-left: 1px solid #d3d1c7; }
+    [data-testid="test-todo-status-control"] button.active-pending    { background: #FAEEDA; color: #633806; }
+    [data-testid="test-todo-status-control"] button.active-inprogress { background: #E6F1FB; color: #0C447C; }
+    [data-testid="test-todo-status-control"] button.active-done       { background: #EAF3DE; color: #27500A; }
+    [data-testid="test-todo-status-control"] button:focus-visible { outline: 2px solid #7F77DD; outline-offset: -2px; }
+
+    [data-testid="test-todo-tags"] { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin-bottom: 18px; }
+    [data-testid="test-todo-tags"] li {
+      font-size: 12px; padding: 3px 11px; border-radius: 99px;
+      background: #f1efe8; color: #5f5e5a; border: 1px solid #d3d1c7;
     }
 
-    .meta-label {
-      font-size: 12px;
-      color: #9a9890;
-    }
-
-    time[data-testid="test-todo-due-date"] {
-      font-size: 13px;
-      font-weight: 500;
-      color: #444441;
-    }
-
-    span[data-testid="test-todo-time-remaining"] {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .time-ok      { color: #3B6D11; }
-    .time-soon    { color: #854F0B; }
-    .time-overdue { color: #A32D2D; }
-
-    /* ── Tags ── */
-    ul[data-testid="test-todo-tags"] {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      list-style: none;
-      margin-bottom: 18px;
-    }
-
-    ul[data-testid="test-todo-tags"] li {
-      font-size: 12px;
-      padding: 3px 11px;
-      border-radius: 99px;
-      background: #f1efe8;
-      color: #5f5e5a;
-      border: 1px solid #d3d1c7;
-    }
-
-    /* ── Actions ── */
     .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      border-top: 1px solid #e8e6de;
-      padding-top: 14px;
+      display: flex; gap: 8px; justify-content: flex-end;
+      border-top: 1px solid #e8e6de; padding-top: 14px;
     }
-
-    button {
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 16px;
-      border-radius: 8px;
-      border: 1px solid #d3d1c7;
-      background: transparent;
-      color: #5f5e5a;
-      cursor: pointer;
+    .btn {
+      font-size: 13px; font-weight: 500; padding: 6px 16px;
+      border-radius: 8px; border: 1px solid #d3d1c7;
+      background: transparent; color: #5f5e5a;
+      cursor: pointer; font-family: inherit;
       transition: background 0.15s, transform 0.1s;
     }
+    .btn:hover   { background: #f1efe8; }
+    .btn:active  { transform: scale(0.97); }
+    .btn:focus-visible { outline: 2px solid #7F77DD; outline-offset: 2px; }
+    .btn-delete  { color: #A32D2D; border-color: #F09595; }
+    .btn-delete:hover { background: #FCEBEB; }
+    .btn-save    { background: #7F77DD; color: #fff; border-color: #7F77DD; }
+    .btn-save:hover { background: #534AB7; }
 
-    button:hover { background: #f1efe8; }
-    button:active { transform: scale(0.97); }
-
-    button:focus-visible {
-      outline: 2px solid #7F77DD;
-      outline-offset: 2px;
+    [data-testid="test-todo-edit-form"] {
+      padding: 1.25rem 1.5rem 1.5rem;
+      border-top: 1px solid #e8e6de;
+      background: #fafaf8;
     }
-
-    button[data-testid="test-todo-delete-button"] {
-      color: #A32D2D;
-      border-color: #F09595;
+    [data-testid="test-todo-edit-form"] label {
+      font-size: 12px; font-weight: 500; color: #5f5e5a;
+      display: block; margin-bottom: 4px;
     }
-
-    button[data-testid="test-todo-delete-button"]:hover {
-      background: #FCEBEB;
+    [data-testid="test-todo-edit-form"] input,
+    [data-testid="test-todo-edit-form"] textarea,
+    [data-testid="test-todo-edit-form"] select {
+      width: 100%; font-size: 13px; padding: 8px 10px;
+      border: 1px solid #d3d1c7; border-radius: 8px;
+      background: #ffffff; color: #1a1a18;
+      margin-bottom: 13px; font-family: inherit;
     }
+    [data-testid="test-todo-edit-form"] textarea { resize: vertical; min-height: 80px; }
+    [data-testid="test-todo-edit-form"] input:focus,
+    [data-testid="test-todo-edit-form"] textarea:focus,
+    [data-testid="test-todo-edit-form"] select:focus { outline: 2px solid #7F77DD; outline-offset: 0; }
 
-    /* ── Responsive ── */
+    .edit-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+
+    .hidden { display: none !important; }
+
     @media (max-width: 520px) {
-      body { padding: 0; align-items: flex-start; }
-      article[data-testid="test-todo-card"] {
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        min-height: 100vh;
-      }
+      body { padding: 0; }
+      article[data-testid="test-todo-card"] { border-radius: 0; min-height: 100vh; }
+      [data-testid="test-todo-status-control"] { width: 100%; }
+      [data-testid="test-todo-status-control"] button { flex: 1; }
     }
   </style>
 </head>
 <body>
 
-  <article
-    data-testid="test-todo-card"
-    role="region"
-    aria-label="Task: Design system audit"
-  >
+<article id="todo-card" data-testid="test-todo-card" class="priority-high" role="region" aria-label="Task card">
+
+  <div class="card-inner">
 
     <div class="card-header">
-      <div class="checkbox-wrap">
-        <label for="todo-complete" class="sr-only">Mark task as complete</label>
-        <input
-          type="checkbox"
-          id="todo-complete"
-          data-testid="test-todo-complete-toggle"
-          aria-label="Mark task as complete"
-        />
+      <span data-testid="test-todo-priority-indicator" id="priority-dot" class="dot-high" aria-hidden="true"></span>
+      <div>
+        <label for="todo-cb" class="sr-only">Mark task as complete</label>
+        <input type="checkbox" id="todo-cb" data-testid="test-todo-complete-toggle" aria-label="Mark task as complete" />
       </div>
-
       <div class="title-area">
         <h2 data-testid="test-todo-title" id="todo-title">Design system audit</h2>
         <div class="badges">
-          <span data-testid="test-todo-priority" aria-label="Priority: High">High</span>
-          <span data-testid="test-todo-status" id="todo-status" aria-label="Status: In Progress">In Progress</span>
+          <span data-testid="test-todo-priority" id="priority-badge" class="badge-priority badge-high" aria-label="Priority: High">High</span>
+          <span data-testid="test-todo-status" id="status-display" aria-label="Status: In Progress">In Progress</span>
+          <span data-testid="test-todo-overdue-indicator" id="overdue-badge" role="alert">Overdue</span>
         </div>
       </div>
     </div>
 
-    <p data-testid="test-todo-description">
-      Review all design tokens, component variants, and accessibility compliance
-      across the product. Document findings and flag inconsistencies for the next sprint.
-    </p>
+    <div class="desc-wrapper">
+      <p data-testid="test-todo-description" id="todo-desc" class="collapsed">
+        Review all design tokens, component variants, and accessibility compliance across the product.
+        Document findings and flag inconsistencies for the next sprint. Include color contrast ratios,
+        focus states, and motion preferences across all breakpoints.
+      </p>
+      <div data-testid="test-todo-collapsible-section" id="collapsible-section">
+        <button data-testid="test-todo-expand-toggle" id="expand-btn" aria-expanded="false" aria-controls="todo-desc">Show more</button>
+      </div>
+    </div>
 
     <div class="meta">
       <div class="meta-item">
         <span class="meta-label">Due</span>
-        <time
-          data-testid="test-todo-due-date"
-          datetime="2026-04-20T18:00:00Z"
-          aria-label="Due date: April 20, 2026"
-        >Apr 20, 2026</time>
+        <time data-testid="test-todo-due-date" id="due-date-display" datetime="2026-04-20T18:00:00Z">Apr 20, 2026</time>
       </div>
       <div class="meta-item">
-        <span class="meta-label">Remaining</span>
-        <span
-          data-testid="test-todo-time-remaining"
-          id="time-remaining"
-          class="time-ok"
-          aria-live="polite"
-          aria-atomic="true"
-        >Calculating…</span>
+        <span class="meta-label">Left</span>
+        <span data-testid="test-todo-time-remaining" id="time-remaining" class="tr-ok" aria-live="polite" aria-atomic="true">Calculating…</span>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <label id="status-ctrl-label">Status</label>
+      <div data-testid="test-todo-status-control" role="group" aria-labelledby="status-ctrl-label">
+        <button id="btn-pending"    aria-pressed="false" onclick="setStatus('Pending')">Pending</button>
+        <button id="btn-inprogress" aria-pressed="true"  onclick="setStatus('In Progress')">In Progress</button>
+        <button id="btn-done"       aria-pressed="false" onclick="setStatus('Done')">Done</button>
       </div>
     </div>
 
@@ -281,79 +249,214 @@
     </ul>
 
     <div class="actions">
-      <button
-        data-testid="test-todo-edit-button"
-        aria-label="Edit task"
-        onclick="console.log('edit clicked')"
-      >Edit</button>
-      <button
-        data-testid="test-todo-delete-button"
-        aria-label="Delete task"
-        onclick="alert('Delete clicked')"
-      >Delete</button>
+      <button class="btn" data-testid="test-todo-edit-button" id="edit-btn" aria-label="Edit task" onclick="openEdit()">Edit</button>
+      <button class="btn btn-delete" data-testid="test-todo-delete-button" aria-label="Delete task" onclick="alert('Delete clicked')">Delete</button>
     </div>
 
-  </article>
+  </div>
 
-  <script>
-    const DUE = new Date('2026-04-20T18:00:00Z');
+  <div data-testid="test-todo-edit-form" id="edit-form" class="hidden" role="region" aria-label="Edit task form">
+    <label for="edit-title">Title</label>
+    <input type="text" id="edit-title" data-testid="test-todo-edit-title-input" aria-label="Task title" />
 
-    function updateTimeRemaining() {
-      const el = document.getElementById('time-remaining');
-      if (!el) return;
+    <label for="edit-desc">Description</label>
+    <textarea id="edit-desc" data-testid="test-todo-edit-description-input" aria-label="Task description"></textarea>
 
-      const diffMs   = DUE - new Date();
-      const diffMins = Math.round(diffMs / 60000);
-      const absM     = Math.abs(diffMins);
+    <label for="edit-priority">Priority</label>
+    <select id="edit-priority" data-testid="test-todo-edit-priority-select" aria-label="Task priority">
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
 
-      el.classList.remove('time-ok', 'time-soon', 'time-overdue');
+    <label for="edit-due">Due date</label>
+    <input type="datetime-local" id="edit-due" data-testid="test-todo-edit-due-date-input" aria-label="Due date" />
 
-      if (Math.abs(diffMins) < 2) {
-        el.textContent = 'Due now!';
-        el.classList.add('time-soon');
-      } else if (diffMins < 0) {
-        if (absM < 60)        el.textContent = `Overdue by ${absM} min`;
-        else if (absM < 1440) el.textContent = `Overdue by ${Math.round(absM / 60)} hr`;
-        else                  el.textContent = `Overdue by ${Math.round(absM / 1440)} day${Math.round(absM/1440) > 1 ? 's' : ''}`;
-        el.classList.add('time-overdue');
-      } else {
-        const days = Math.floor(diffMins / 1440);
-        const hrs  = Math.floor((diffMins % 1440) / 60);
-        if (days === 0) {
-          el.textContent = hrs === 0 ? `Due in ${diffMins} min` : `Due in ${hrs} hr`;
-          el.classList.add('time-soon');
-        } else if (days === 1) {
-          el.textContent = 'Due tomorrow';
-          el.classList.add('time-soon');
-        } else {
-          el.textContent = `Due in ${days} days`;
-          el.classList.add('time-ok');
-        }
-      }
-    }
+    <div class="edit-actions">
+      <button class="btn" data-testid="test-todo-cancel-button" onclick="cancelEdit()">Cancel</button>
+      <button class="btn btn-save" data-testid="test-todo-save-button" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
 
-    updateTimeRemaining();
-    setInterval(updateTimeRemaining, 60000);
+</article>
 
-    /* Checkbox toggle */
-    const cb     = document.getElementById('todo-complete');
-    const title  = document.getElementById('todo-title');
-    const status = document.getElementById('todo-status');
+<script>
+  var state = {
+    title: 'Design system audit',
+    desc: 'Review all design tokens, component variants, and accessibility compliance across the product. Document findings and flag inconsistencies for the next sprint. Include color contrast ratios, focus states, and motion preferences across all breakpoints.',
+    priority: 'High',
+    due: new Date('2026-04-20T18:00:00Z'),
+    status: 'In Progress',
+    done: false
+  };
+  var snapshot = null;
+  var timerInterval = null;
 
-    cb.addEventListener('change', () => {
-      if (cb.checked) {
-        title.classList.add('done');
-        status.textContent = 'Done';
-        status.classList.add('status-done');
-        status.setAttribute('aria-label', 'Status: Done');
-      } else {
-        title.classList.remove('done');
-        status.textContent = 'In Progress';
-        status.classList.remove('status-done');
-        status.setAttribute('aria-label', 'Status: In Progress');
-      }
+  function applyPriority(p) {
+    var card = document.getElementById('todo-card');
+    card.classList.remove('priority-high', 'priority-medium', 'priority-low');
+    card.classList.add('priority-' + p.toLowerCase());
+    var dot = document.getElementById('priority-dot');
+    dot.className = 'dot-' + p.toLowerCase();
+    var badge = document.getElementById('priority-badge');
+    badge.textContent = p;
+    badge.className = 'badge-priority badge-' + p.toLowerCase();
+    badge.setAttribute('aria-label', 'Priority: ' + p);
+  }
+
+  function applyStatus(s) {
+    state.status = s;
+    var cb    = document.getElementById('todo-cb');
+    var title = document.getElementById('todo-title');
+    var disp  = document.getElementById('status-display');
+    var tr    = document.getElementById('time-remaining');
+
+    ['btn-pending', 'btn-inprogress', 'btn-done'].forEach(function(id) {
+      document.getElementById(id).className = '';
+      document.getElementById(id).setAttribute('aria-pressed', 'false');
     });
-  </script>
+
+    if (s === 'Done') {
+      cb.checked = true; state.done = true;
+      title.classList.add('done');
+      disp.textContent = 'Done';
+      disp.setAttribute('aria-label', 'Status: Done');
+      document.getElementById('btn-done').className = 'active-done';
+      document.getElementById('btn-done').setAttribute('aria-pressed', 'true');
+      tr.textContent = 'Completed'; tr.className = 'tr-done';
+      clearInterval(timerInterval);
+    } else if (s === 'In Progress') {
+      cb.checked = false; state.done = false;
+      title.classList.remove('done');
+      disp.textContent = 'In Progress';
+      disp.setAttribute('aria-label', 'Status: In Progress');
+      document.getElementById('btn-inprogress').className = 'active-inprogress';
+      document.getElementById('btn-inprogress').setAttribute('aria-pressed', 'true');
+      startTimer();
+    } else {
+      cb.checked = false; state.done = false;
+      title.classList.remove('done');
+      disp.textContent = 'Pending';
+      disp.setAttribute('aria-label', 'Status: Pending');
+      document.getElementById('btn-pending').className = 'active-pending';
+      document.getElementById('btn-pending').setAttribute('aria-pressed', 'true');
+      startTimer();
+    }
+  }
+
+  function setStatus(s) { applyStatus(s); }
+
+  function updateTimeRemaining() {
+    if (state.done) return;
+    var el   = document.getElementById('time-remaining');
+    var ob   = document.getElementById('overdue-badge');
+    var card = document.getElementById('todo-card');
+    var diff = state.due - new Date();
+    var mins = Math.round(diff / 60000);
+    var abs  = Math.abs(mins);
+
+    el.classList.remove('tr-ok', 'tr-soon', 'tr-overdue');
+
+    if (Math.abs(mins) < 2) {
+      el.textContent = 'Due now!'; el.classList.add('tr-soon');
+      ob.classList.remove('show'); card.classList.remove('is-overdue');
+    } else if (mins < 0) {
+      var txt = abs < 60
+        ? 'Overdue by ' + abs + ' min'
+        : abs < 1440
+          ? 'Overdue by ' + Math.round(abs / 60) + ' hr'
+          : 'Overdue by ' + Math.round(abs / 1440) + ' day' + (Math.round(abs/1440) > 1 ? 's' : '');
+      el.textContent = txt; el.classList.add('tr-overdue');
+      ob.classList.add('show'); card.classList.add('is-overdue');
+    } else {
+      var days    = Math.floor(mins / 1440);
+      var hrs     = Math.floor((mins % 1440) / 60);
+      var remMins = mins % 60;
+      var txt2 = days > 1   ? 'Due in ' + days + ' days'
+               : days === 1 ? 'Due tomorrow'
+               : hrs > 0    ? 'Due in ' + hrs + ' hr'
+               :              'Due in ' + remMins + ' min';
+      el.textContent = txt2;
+      el.classList.add((days === 0 && hrs < 3) ? 'tr-soon' : 'tr-ok');
+      ob.classList.remove('show'); card.classList.remove('is-overdue');
+    }
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    updateTimeRemaining();
+    timerInterval = setInterval(updateTimeRemaining, 30000);
+  }
+
+  document.getElementById('todo-cb').addEventListener('change', function() {
+    applyStatus(this.checked ? 'Done' : 'Pending');
+  });
+
+  document.getElementById('expand-btn').addEventListener('click', function() {
+    var desc     = document.getElementById('todo-desc');
+    var expanded = this.getAttribute('aria-expanded') === 'true';
+    if (expanded) {
+      desc.classList.add('collapsed');
+      this.setAttribute('aria-expanded', 'false');
+      this.textContent = 'Show more';
+    } else {
+      desc.classList.remove('collapsed');
+      this.setAttribute('aria-expanded', 'true');
+      this.textContent = 'Show less';
+    }
+  });
+
+  function openEdit() {
+    snapshot = Object.assign({}, state);
+    document.getElementById('edit-title').value    = state.title;
+    document.getElementById('edit-desc').value     = state.desc;
+    document.getElementById('edit-priority').value = state.priority;
+    var local = new Date(state.due.getTime() - state.due.getTimezoneOffset() * 60000)
+      .toISOString().slice(0, 16);
+    document.getElementById('edit-due').value = local;
+    document.getElementById('edit-form').classList.remove('hidden');
+    document.getElementById('edit-title').focus();
+  }
+
+  function cancelEdit() {
+    if (snapshot) { state = Object.assign({}, snapshot); snapshot = null; }
+    document.getElementById('edit-form').classList.add('hidden');
+    document.getElementById('edit-btn').focus();
+  }
+
+  function saveEdit() {
+    var newTitle    = document.getElementById('edit-title').value.trim();
+    var newDesc     = document.getElementById('edit-desc').value.trim();
+    var newPriority = document.getElementById('edit-priority').value;
+    var newDueVal   = document.getElementById('edit-due').value;
+
+    if (newTitle)    state.title    = newTitle;
+    if (newDesc)     state.desc     = newDesc;
+    if (newPriority) state.priority = newPriority;
+    if (newDueVal)   state.due      = new Date(newDueVal);
+
+    document.getElementById('todo-title').textContent = state.title;
+    document.getElementById('todo-desc').textContent  = state.desc;
+    document.getElementById('todo-desc').classList.add('collapsed');
+    document.getElementById('expand-btn').setAttribute('aria-expanded', 'false');
+    document.getElementById('expand-btn').textContent = 'Show more';
+
+    var opts = { month: 'short', day: 'numeric', year: 'numeric' };
+    document.getElementById('due-date-display').textContent =
+      state.due.toLocaleDateString('en-US', opts);
+    document.getElementById('due-date-display').setAttribute('datetime', state.due.toISOString());
+
+    applyPriority(state.priority);
+    if (!state.done) updateTimeRemaining();
+    document.getElementById('edit-form').classList.add('hidden');
+    document.getElementById('edit-btn').focus();
+    snapshot = null;
+  }
+
+  applyPriority('High');
+  applyStatus('In Progress');
+  startTimer();
+</script>
 
 </body>
 </html>
