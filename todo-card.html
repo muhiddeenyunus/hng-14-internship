@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo Item Card</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f4f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    article[data-testid="test-todo-card"] {
+      background: #ffffff;
+      border: 1px solid #e2e0d8;
+      border-radius: 14px;
+      padding: 1.5rem 1.5rem 1.25rem;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    /* ── Header ── */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      padding-top: 3px;
+      flex-shrink: 0;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #7F77DD;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"]:focus-visible {
+      outline: 2px solid #7F77DD;
+      outline-offset: 3px;
+    }
+
+    .title-area { flex: 1; min-width: 0; }
+
+    h2[data-testid="test-todo-title"] {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a18;
+      line-height: 1.4;
+      transition: all 0.2s ease;
+    }
+
+    h2.done {
+      text-decoration: line-through;
+      color: #9a9890;
+    }
+
+    /* ── Badges ── */
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 7px;
+    }
+
+    span[data-testid="test-todo-priority"] {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 11px;
+      border-radius: 99px;
+      background: #AFA9EC;
+      color: #3C3489;
+    }
+
+    span[data-testid="test-todo-status"] {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 11px;
+      border-radius: 99px;
+      background: #f1efe8;
+      color: #5f5e5a;
+      border: 1px solid #d3d1c7;
+      transition: all 0.2s ease;
+    }
+
+    span[data-testid="test-todo-status"].status-done {
+      background: #C0DD97;
+      color: #27500A;
+      border-color: #97C459;
+    }
+
+    /* ── Description ── */
+    p[data-testid="test-todo-description"] {
+      font-size: 14px;
+      color: #5f5e5a;
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    /* ── Meta ── */
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .meta-label {
+      font-size: 12px;
+      color: #9a9890;
+    }
+
+    time[data-testid="test-todo-due-date"] {
+      font-size: 13px;
+      font-weight: 500;
+      color: #444441;
+    }
+
+    span[data-testid="test-todo-time-remaining"] {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .time-ok      { color: #3B6D11; }
+    .time-soon    { color: #854F0B; }
+    .time-overdue { color: #A32D2D; }
+
+    /* ── Tags ── */
+    ul[data-testid="test-todo-tags"] {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      list-style: none;
+      margin-bottom: 18px;
+    }
+
+    ul[data-testid="test-todo-tags"] li {
+      font-size: 12px;
+      padding: 3px 11px;
+      border-radius: 99px;
+      background: #f1efe8;
+      color: #5f5e5a;
+      border: 1px solid #d3d1c7;
+    }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      border-top: 1px solid #e8e6de;
+      padding-top: 14px;
+    }
+
+    button {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: 1px solid #d3d1c7;
+      background: transparent;
+      color: #5f5e5a;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:hover { background: #f1efe8; }
+    button:active { transform: scale(0.97); }
+
+    button:focus-visible {
+      outline: 2px solid #7F77DD;
+      outline-offset: 2px;
+    }
+
+    button[data-testid="test-todo-delete-button"] {
+      color: #A32D2D;
+      border-color: #F09595;
+    }
+
+    button[data-testid="test-todo-delete-button"]:hover {
+      background: #FCEBEB;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      body { padding: 0; align-items: flex-start; }
+      article[data-testid="test-todo-card"] {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        min-height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <article
+    data-testid="test-todo-card"
+    role="region"
+    aria-label="Task: Design system audit"
+  >
+
+    <div class="card-header">
+      <div class="checkbox-wrap">
+        <label for="todo-complete" class="sr-only">Mark task as complete</label>
+        <input
+          type="checkbox"
+          id="todo-complete"
+          data-testid="test-todo-complete-toggle"
+          aria-label="Mark task as complete"
+        />
+      </div>
+
+      <div class="title-area">
+        <h2 data-testid="test-todo-title" id="todo-title">Design system audit</h2>
+        <div class="badges">
+          <span data-testid="test-todo-priority" aria-label="Priority: High">High</span>
+          <span data-testid="test-todo-status" id="todo-status" aria-label="Status: In Progress">In Progress</span>
+        </div>
+      </div>
+    </div>
+
+    <p data-testid="test-todo-description">
+      Review all design tokens, component variants, and accessibility compliance
+      across the product. Document findings and flag inconsistencies for the next sprint.
+    </p>
+
+    <div class="meta">
+      <div class="meta-item">
+        <span class="meta-label">Due</span>
+        <time
+          data-testid="test-todo-due-date"
+          datetime="2026-04-20T18:00:00Z"
+          aria-label="Due date: April 20, 2026"
+        >Apr 20, 2026</time>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Remaining</span>
+        <span
+          data-testid="test-todo-time-remaining"
+          id="time-remaining"
+          class="time-ok"
+          aria-live="polite"
+          aria-atomic="true"
+        >Calculating…</span>
+      </div>
+    </div>
+
+    <ul data-testid="test-todo-tags" role="list" aria-label="Tags">
+      <li data-testid="test-todo-tag-work">Work</li>
+      <li data-testid="test-todo-tag-urgent">Urgent</li>
+      <li>Design</li>
+    </ul>
+
+    <div class="actions">
+      <button
+        data-testid="test-todo-edit-button"
+        aria-label="Edit task"
+        onclick="console.log('edit clicked')"
+      >Edit</button>
+      <button
+        data-testid="test-todo-delete-button"
+        aria-label="Delete task"
+        onclick="alert('Delete clicked')"
+      >Delete</button>
+    </div>
+
+  </article>
+
+  <script>
+    const DUE = new Date('2026-04-20T18:00:00Z');
+
+    function updateTimeRemaining() {
+      const el = document.getElementById('time-remaining');
+      if (!el) return;
+
+      const diffMs   = DUE - new Date();
+      const diffMins = Math.round(diffMs / 60000);
+      const absM     = Math.abs(diffMins);
+
+      el.classList.remove('time-ok', 'time-soon', 'time-overdue');
+
+      if (Math.abs(diffMins) < 2) {
+        el.textContent = 'Due now!';
+        el.classList.add('time-soon');
+      } else if (diffMins < 0) {
+        if (absM < 60)        el.textContent = `Overdue by ${absM} min`;
+        else if (absM < 1440) el.textContent = `Overdue by ${Math.round(absM / 60)} hr`;
+        else                  el.textContent = `Overdue by ${Math.round(absM / 1440)} day${Math.round(absM/1440) > 1 ? 's' : ''}`;
+        el.classList.add('time-overdue');
+      } else {
+        const days = Math.floor(diffMins / 1440);
+        const hrs  = Math.floor((diffMins % 1440) / 60);
+        if (days === 0) {
+          el.textContent = hrs === 0 ? `Due in ${diffMins} min` : `Due in ${hrs} hr`;
+          el.classList.add('time-soon');
+        } else if (days === 1) {
+          el.textContent = 'Due tomorrow';
+          el.classList.add('time-soon');
+        } else {
+          el.textContent = `Due in ${days} days`;
+          el.classList.add('time-ok');
+        }
+      }
+    }
+
+    updateTimeRemaining();
+    setInterval(updateTimeRemaining, 60000);
+
+    /* Checkbox toggle */
+    const cb     = document.getElementById('todo-complete');
+    const title  = document.getElementById('todo-title');
+    const status = document.getElementById('todo-status');
+
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        title.classList.add('done');
+        status.textContent = 'Done';
+        status.classList.add('status-done');
+        status.setAttribute('aria-label', 'Status: Done');
+      } else {
+        title.classList.remove('done');
+        status.textContent = 'In Progress';
+        status.classList.remove('status-done');
+        status.setAttribute('aria-label', 'Status: In Progress');
+      }
+    });
+  </script>
+
+</body>
+</html>
